@@ -3,9 +3,15 @@ import styles from "../styles/Home.module.css";
 import axios from "axios";
 import { useState } from "react";
 import { getCookie, hasCookie } from "cookies-next";
+import Link from "next/link";
+import { API } from "../services/api";
 
 export default function Home({ initUserInfo }) {
   const [userInfo, setUserInfo] = useState(initUserInfo);
+  const [isLogin, setIsLogin] = useState(
+    initUserInfo === "None" ? "None" : "Exists"
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -14,7 +20,7 @@ export default function Home({ initUserInfo }) {
         email: e.target.email.value,
         password: e.target.password.value,
       });
-
+      setIsLogin("Exists");
       console.log("login success");
     } catch (e) {
       console.log("login failed");
@@ -52,23 +58,27 @@ export default function Home({ initUserInfo }) {
 
         <button>로그인</button>
       </form>
-      <div>유저정보</div>
       <div>
-        <span>{userInfo}</span>
+        유저정보<span>{isLogin}</span>
+        <div>{userInfo}</div>
       </div>
+
       <button onClick={handleUser}>유저정보 가져오기</button>
+      <div>
+        <Link href="/auth">유저 페이지 바로가기</Link>
+      </div>
     </div>
   );
 }
 
 export async function getServerSideProps({ req, res }) {
-  let userData = "None";
-
-  // console.log(getCookie("loginData", { req, res }));
-  // if (hasCookie("loginData", { req, res })) {
-  //   const res = await axios.get("/api/user");
-  //   userData = res.data;
-  // }
+  if (!hasCookie("loginData", { req, res })) {
+    return {
+      props: {
+        initUserInfo: "None",
+      },
+    };
+  }
 
   res.setHeader(
     "Cache-Control",
@@ -77,7 +87,7 @@ export async function getServerSideProps({ req, res }) {
 
   return {
     props: {
-      initUserInfo: userData,
+      initUserInfo: "Exists",
     },
   };
 }

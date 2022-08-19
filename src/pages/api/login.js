@@ -14,7 +14,7 @@ export default async function login(req, res) {
       res,
       maxAge: 60 * 60 * 2,
       httpOnly: true,
-      // secure: true,
+      secure: true,
       sameSite: "strict",
     });
 
